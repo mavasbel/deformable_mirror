@@ -3,11 +3,11 @@ close all
 clc
 
 % Loading saved data
-fileName = "InfMat9.mat";
+fileName = "InfMat25.mat";
 load(fileName)
 
 % Creates masks of electrodes
-MirrorMask = zeros(MirrorGridSize,MirrorGridSize);
+% MirrorMask = zeros(MirrorGridSize,MirrorGridSize);
 ElectMasks = zeros(MirrorGridSize,MirrorGridSize,ElectGrid^2);
 for j=1:MirrorGridSize
     for i=1:MirrorGridSize
@@ -19,9 +19,9 @@ for j=1:MirrorGridSize
                 ElectMasks(i,j,k) = 1;
             end
         end
-        if( ~isnan(InfFuncs(i,j,1)) )
-            MirrorMask(i,j) = 1;
-        end
+%         if( ~isnan(InfFuncs(i,j,1)) )
+%             MirrorMask(i,j) = 1;
+%         end
     end
 end
 
@@ -38,12 +38,16 @@ for k=1:ElectGrid^2
     MCal(:,k) = vec;
 end
 
+% Computes spring constans matrix K and final mirror mat such that
+% Z = MirrorMat * YPhi with
+% MirrorMat = inv(I+Matcal*K*ElectAvg)*MCal such t
 K = diag(ones(ElectGrid^2,1));
 MMCal = eye(totalZPoints,totalZPoints) + MCal*K*AvgElectMask;
 MirrorMat = inv(MMCal)*MCal;
 
+% Plots illustrative output with some random pressures
 % YPhi = ones(ElectGrid^2,1)*0.5;
-YPhi = rand(ElectGrid^2,1)*0.5 - 0.25
+YPhi = rand(ElectGrid^2,1)*0.5 - 0.25;
 % Z = inv(MMCal'*MMCal)*MMCal'*MCal*YPhi;
 Z = MirrorMat*YPhi;
 
