@@ -2,10 +2,10 @@ close all
 clc
 
 % Parameters for computation and saving of influence functions
-fileName = "InfMat25.mat";
+fileName = "InfMat.mat";
 a = 1;
 T = 1;
-NSeqLim = 100;
+NSeqLim = 80;
 ElectGridSize = 50;
 MirrorGridSize = 100;
 mirrorXLim = [-MaxRad, MaxRad];

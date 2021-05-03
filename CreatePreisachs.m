@@ -2,7 +2,7 @@ close all
 clc
 
 % Consider electrical coupling factor and paramenters of base Preisach
-CouplFac = 0.3;
+CouplFac = 0.40;
 basePhi = preisachRelayModel;
 inputMin = preisachRelayModel.inputGrid(1);
 inputMax = preisachRelayModel.inputGrid(end);
@@ -19,7 +19,7 @@ for i=1:ElectGrid^2
 end
 
 % Creates matrix of coupling factors
-ECoup = eye(ElectGrid^2);
+ECoup = eye(ElectGrid^2+1,ElectGrid^2);
 for i=1:ElectGrid^2
     for j=1:ElectGrid^2
         if(i~=j)
@@ -27,6 +27,7 @@ for i=1:ElectGrid^2
         end
     end
 end
+ECoup(end,:) = ones(1,ElectGrid^2); % The last corresponds to all selected
 
 % applyInput(PhiArr,inputMax,1,ones(ElectGrid^2,ElectGrid^2));
 % applyInput(PhiArr,-800,1,ones(ElectGrid^2,ElectGrid^2));

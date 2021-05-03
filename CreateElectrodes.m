@@ -1,4 +1,4 @@
-% clear all
+clear all
 close all
 clc
 
@@ -6,7 +6,7 @@ clc
 MaxRad = 1;
 EfectiveSurfFact = 0.65;
 ElectGrid = 5;
-ElectWidth = 0.1;
+ElectWidth = 0.14;
 ElectCorner00 = EfectiveSurfFact*MaxRad/sqrt(2);
 ElectSpace = (EfectiveSurfFact*MaxRad/sqrt(2)-ElectWidth...
                 + EfectiveSurfFact*MaxRad/sqrt(2))/(ElectGrid-1);
