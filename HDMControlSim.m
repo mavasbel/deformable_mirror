@@ -65,7 +65,7 @@ voltageInput = linspace(-800,0,samplesPerSegment);
 % Control loop
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-lambda = 2000;
+lambda = 1200;
 iter = 0;
 
 [ZZerMask,~] = MatUtils.matrixToVecIdxMap(ZMat,ZernikeMask);
@@ -103,6 +103,7 @@ while(true)
     end
     
     if(ResetFlag)
+        disp("Resetting...");
         title("Resetting");
         voltageInput = linspace(0,inputMax,samplesPerSegment);
         [Z,ZMat,Phi] = applyInputAnim(voltageInput,ElectGrid^2+1,true);
