@@ -99,6 +99,20 @@ xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]);
 zlim([-1,1]*1.25);
 title("Random Pressures");
 
+% Some Influence functions
+figure; counter=1;
+for i=[1 5 10 15 20 25] %i=1:ElectGrid^2
+    handler = subplot(2,3,counter);
+    YPhi = [zeros(i-1,1);1;zeros(ElectGrid^2-i,1)];
+    Z = MirrorMat*YPhi;
+    ZMat = MatUtils.vecIdxMapToMatrix(Z,mirrorMaskIdxMap,MirrorGridSize,MirrorGridSize,NaN);
+    surf(handler,mirrorXGrid,mirrorYGrid,ZMat,'edgecolor','interp'); hold off; drawnow;
+    xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]);
+    zlim([-1,1]*0.30);
+    title("Actuator "+i);
+    counter = counter + 1;
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Everything here is computed using zernike mask
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -132,10 +146,18 @@ YPhiRef = ZerPinvMirrorMat*ZernikePolMaskVec;
 ZFit = MirrorMat*YPhiRef;
 ZFitMat = MatUtils.vecIdxMapToMatrix(ZFit,mirrorMaskIdxMap,MirrorGridSize,MirrorGridSize,NaN);
 ZFitZerMask = MatUtils.matrixToVecIdxMap(ZFitMat,maskToUse);
-figure; surf(mirrorXGrid,mirrorYGrid,ZFitMat); hold off; drawnow;
+
+figure; surf(mirrorXGrid,mirrorYGrid,ZFitMat,'edgecolor','interp'); hold off; drawnow;
+colorbar; colormap jet;
+shading interp
+ZMax = max(ZFit); ZMin = min(ZFit); ZPad = 0.20;
+ZAmp = ZMax - ZMin; ZMaxAbs = max(abs([ZMin,ZMax]));
+zlim([-1 1]*ZMaxAbs); caxis([-1,1]*ZMaxAbs);
+daspect([1,1,max([ZAmp,ZPad])*1.35]);
 xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]); 
-zlim([ZernikePolMin-ZernikePolAmp*0.1, ZernikePolMax+ZernikePolAmp*0.1]);
-daspect([1,1,0.05]);
-title("Best Zernike Fit");
+title("Reference $Z_d$",'interpreter','latex');
+% zlim([ZernikePolMin-ZernikePolAmp*0.1, ZernikePolMax+ZernikePolAmp*0.1]);
+% daspect([1,1,0.05]);
+% title("Best Zernike Fit");
 TotalSqrError = sum((ZFit-ZernikePolVec).^2)
 

@@ -3,6 +3,7 @@ close all
 clc
 
 % Parameters for electrodes creation
+lineWidth = 1.5;
 MaxRad = 1;
 EfectiveSurfFact = 0.65;
 ElectGrid = 5;
@@ -23,25 +24,49 @@ for k = 1:ElectGrid  % These are the rows
                     ElectCorners(l+(k-1)*ElectGrid,2)],...
                 [ElectCorners(l+(k-1)*ElectGrid,3),...
                     ElectCorners(l+(k-1)*ElectGrid,3)],...
-                'k'); hold on;
+                'k','linewidth',lineWidth); hold on;
         plot([ElectCorners(l+(k-1)*ElectGrid,2),...
                     ElectCorners(l+(k-1)*ElectGrid,2)],...
                 [ElectCorners(l+(k-1)*ElectGrid,3),...
                     ElectCorners(l+(k-1)*ElectGrid,4)],...
-                'k'); hold on;
+                'k','linewidth',lineWidth); hold on;
         plot([ElectCorners(l+(k-1)*ElectGrid,2),...
                     ElectCorners(l+(k-1)*ElectGrid,1)],...
                 [ElectCorners(l+(k-1)*ElectGrid,4),...
                     ElectCorners(l+(k-1)*ElectGrid,4)],...
-                'k'); hold on;
+                'k','linewidth',lineWidth); hold on;
         plot([ElectCorners(l+(k-1)*ElectGrid,1),...
                     ElectCorners(l+(k-1)*ElectGrid,1)],...
                 [ElectCorners(l+(k-1)*ElectGrid,4),...
                     ElectCorners(l+(k-1)*ElectGrid,3)],...
-                'k'); hold on;
+                'k','linewidth',lineWidth); hold on;
     end
 end
 x = linspace(-MaxRad,MaxRad,100);
-plot(x,sqrt(MaxRad^2-x.^2),'k'); hold on;
-plot(x,-sqrt(MaxRad^2-x.^2),'k'); hold off;
+plot(x,sqrt(MaxRad^2-x.^2),'k','linewidth',lineWidth); hold on;
+plot(x,-sqrt(MaxRad^2-x.^2),'k','linewidth',lineWidth); hold on;
 axis square
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Parameters for computation and saving of influence functions
+a = 1;
+T = 1;
+MirrorGridSize = 100;
+mirrorXLim = [-MaxRad, MaxRad];
+mirrorYLim = [-MaxRad, MaxRad];
+mirrorXIsoLine = linspace(mirrorXLim(1),mirrorXLim(2),MirrorGridSize);
+mirrorYIsoLine = linspace(mirrorYLim(1),mirrorYLim(2),MirrorGridSize);
+[mirrorXGrid,mirrorYGrid] = meshgrid(mirrorXIsoLine,mirrorYIsoLine);
+
+MirrorMask = mirrorXGrid.^2 + mirrorYGrid.^2 <= MaxRad^2*ones(MirrorGridSize,MirrorGridSize);
+
+% for j=1:MirrorGridSize
+%     for i=1:MirrorGridSize
+%         % Validates that point is inside the mirror
+%         if( MirrorMask(i,j) == 1)
+%             plot(mirrorXGrid(i,j),mirrorYGrid(i,j),'*b'); hold on;
+%             drawnow limitrate
+%         end
+%     end
+% end

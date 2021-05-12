@@ -1,21 +1,11 @@
 close all
 clc
 
-% Parameters for computation and saving of influence functions
+% File name to store influence functions
 fileName = "InfMat.mat";
-a = 1;
-T = 1;
 NSeqLim = 80;
 ElectGridSize = 50;
-MirrorGridSize = 100;
-mirrorXLim = [-MaxRad, MaxRad];
-mirrorYLim = [-MaxRad, MaxRad];
-mirrorXIsoLine = linspace(mirrorXLim(1),mirrorXLim(2),MirrorGridSize);
-mirrorYIsoLine = linspace(mirrorYLim(1),mirrorYLim(2),MirrorGridSize);
-[mirrorXGrid,mirrorYGrid] = meshgrid(mirrorXIsoLine,mirrorYIsoLine);
 
-tStart = tic;
-MirrorMask = mirrorXGrid.^2 + mirrorYGrid.^2 <= MaxRad^2*ones(MirrorGridSize,MirrorGridSize);
 InfFuncs = NaN(MirrorGridSize,MirrorGridSize,size(ElectCorners,1));
 for k = 1:size(ElectCorners,1)
     tElect = tic;
