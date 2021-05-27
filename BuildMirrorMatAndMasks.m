@@ -43,6 +43,29 @@ for j=1:MirrorGridSize
     end
 end
 
+% Multiplot Zerenikes
+nZerPlots = [2 4 6 8 10 4]; mZerPlots = [2 2 2 2 2 4];
+ZernikePolPlots = NaN(MirrorGridSize,MirrorGridSize,length(nZerPlots));
+%ZernikePolPlots(MirrorMask)=0;
+figure; counter=1;
+for k = 1:length(nZerPlots)
+    for j=1:MirrorGridSize
+        for i=1:MirrorGridSize
+            r = sqrt(mirrorXGrid(i,j)^2 + mirrorYGrid(i,j)^2);
+            if( r<0.95 )
+                phi = atan2(mirrorYGrid(i,j),mirrorXGrid(i,j));
+                ZernikePolPlots(i,j,k) = zernfun(nZerPlots(k),mZerPlots(k),r,phi,'norm');
+            end
+        end
+    end
+    handler = subplot(2,3,counter);
+    surf(handler,mirrorXGrid,mirrorYGrid,ZernikePolPlots(:,:,k),'edgecolor','interp'); hold off; drawnow;
+    xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]);
+    zlim([-1,1]*1.5);
+    title("Zernike n: " + nZerPlots(k) + ", m: " + mZerPlots(k));
+    counter = counter + 1;
+end
+
 % Plot Zernike function
 ZernikePolMax = max(max(ZernikePol)); ZernikePolMin = min(min(ZernikePol));
 ZernikePolAmp = ZernikePolMax - ZernikePolMin;
@@ -67,7 +90,7 @@ zlim([ZernikePolMin-ZernikePolAmp*0.1,ZernikePolMax+ZernikePolAmp*0.1]);
 
 % Accommodates the values of the influence functions to be multiplied by
 % the vectors such that the defelction is z = MCal * P with P being the
-% vector of preassure of each electrode
+% vector with the preassure of each electrode
 maskToUse = MirrorMask;
 TotalZPoints = sum(sum(maskToUse));
 AvgElectVecMask = NaN(TotalZPoints,ElectGrid^2);
@@ -82,7 +105,7 @@ end
 
 % Computes spring constans matrix K and final mirror mat such that
 % Z = MirrorMat * YPhi with
-% MirrorMat = inv(I+Matcal*K*ElectAvg)*MCal such t
+% MirrorMat = inv(I+Matcal*K*ElectAvg)*MCal
 K = diag(ones(ElectGrid^2,1));
 MMCal = eye(TotalZPoints,TotalZPoints) + MCal*K*(AvgElectVecMask');
 MirrorMat = inv(MMCal)*MCal;
@@ -96,7 +119,7 @@ Z = MirrorMat*YPhi;
 ZMat = MatUtils.vecIdxMapToMatrix(Z,mirrorMaskIdxMap,MirrorGridSize,MirrorGridSize,NaN);
 figure; surf(mirrorXGrid,mirrorYGrid,ZMat); hold off; drawnow;
 xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]);
-zlim([-1,1]*1.25);
+zlim([-1,1]*0.5);
 title("Random Pressures");
 
 % Some Influence functions
@@ -119,7 +142,7 @@ end
 
 % Accommodates the values of the influence functions to be multiplied by
 % the vectors such that the defelction is z = MCal * P with P being the
-% vector of preassure of each electrode
+% vector with the preassure of each electrode
 maskToUse = ZernikeMask;
 ZerTotalZPoints = sum(sum(maskToUse));
 ZerAvgElectVecMask = NaN(ZerTotalZPoints,ElectGrid^2);
@@ -134,7 +157,7 @@ end
 
 % Computes spring constans matrix K and final mirror mat such that
 % Z = MirrorMat * YPhi with
-% MirrorMat = inv(I+Matcal*K*ElectAvg)*MCal such t
+% MirrorMat = inv(I+Matcal*K*ElectAvg)*MCal
 K = diag(ones(ElectGrid^2,1));
 ZerMMCal = eye(ZerTotalZPoints,ZerTotalZPoints) + ZerMCal*K*(ZerAvgElectVecMask');
 ZerMirrorMat = inv(ZerMMCal)*ZerMCal;

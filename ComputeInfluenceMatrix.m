@@ -58,7 +58,7 @@ function term = getMTerm(x,y,x1,x2,y1,y2,electGridSize,nlim)
             phip = atan2(yGrid(i,j),xGrid(i,j));
             
             %For the change of variables to cartesian coordinates with the
-            %transformation map (x,y = T(r,phi) = r*cos(phi),r*sin(phi) if
+            %transformation map (x,y = T(r,phi) = r*cos(phi),r*sin(phi) it
             %would be neccesary to multiply funMat by 1/det(dT) with
             %1/det([cos(phip) -rp*sin(phip);
             %       sin(phip)  rp*cos(phip)])=1/rp;
@@ -95,27 +95,3 @@ function int2 = getIntegrand2(r,phi,rp,phip,nlim)
     %with the 1/det(dT)=1/rp
     int2 = (log(1/rp)-sum2);
 end
-
-% function int1 = getIntegrand1(r,phi,rp,phip,nlim)
-%     persistent n
-%     if isempty(n)
-%         syms n;
-%     end
-%     sum1 = symsum( (1/n)*((r*rp)^n-(rp/r)^n)...
-%                     *cos(n*(phip-phi)),...
-%                     n,1,nlim );
-%     %Due to the change of variables *rp is not neccesary because it cancels
-%     %with the 1/det(dT)= 1/rp
-%     int1 = (log(1/r)-sum1); 
-% end
-
-% function int2 = getIntegrand2(r,phi,rp,phip,nlim)
-%     persistent n
-%     if isempty(n)
-%         syms n;
-%     end
-%     sum2 = symsum( (1/n)*((r*rp)^n-(r/rp)^n)...
-%                     *cos(n*(phip-phi)),...
-%                     n,1,nlim );
-%     int2 = (log(1/rp)-sum2);
-% end
