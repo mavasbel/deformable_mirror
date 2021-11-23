@@ -6,14 +6,20 @@ clc
 fileName = "InfMat25BigElect.mat";
 load(fileName)
 
+% Influence functions scaled by the relation between radius and surface tension
+% ScaledInfFuncs = InfFuncs/max(max(max(InfFuncs)))-min(min(min(InfFuncs))) ); % Assuming surface tension and radious relation is rad = 10cm, tension=100N
+ScaledInfFuncs = InfFuncs; % Assuming surface tension and radious relation is rad = 10cm = 100mm, tension=10N
+
 % ZernikePol
-nZer = 4; mZer = 2;
-ZenikeEfectSurfFact = 1.0;
-ZernikeAmpFact = 0.02;
-ZernikeRadReductFact = 1;
-ZernikePol = NaN(MirrorGridSize,MirrorGridSize);
-ZernikePol(MirrorMask)=0;
-ZernikeMask = NaN(MirrorGridSize,MirrorGridSize);
+ZerN = 2; ZerM = -2;
+% ZerN = 1; ZerM = -1;
+% ZerN = 4; ZerM = 2;
+ZenEffectSurfFact = 1/0.60;
+% ZerAmpFact = 0.025;
+ZerAmpFact = 50;
+ZerRadTrim = 0.65;
+ZerPol = NaN(MirrorGridSize,MirrorGridSize);
+ZerMask = zeros(MirrorGridSize,MirrorGridSize);
 
 % Creates masks of electrodes
 % MirrorMask = zeros(MirrorGridSize,MirrorGridSize);
@@ -31,58 +37,59 @@ for j=1:MirrorGridSize
         end
         r = (sqrt(mirrorXGrid(i,j)^2 + mirrorYGrid(i,j)^2)...
                 /(EfectiveSurfFact*MaxRad))...
-                /ZenikeEfectSurfFact;
-        if( MirrorMask(i,j) && r<ZernikeRadReductFact)
+                /ZenEffectSurfFact;
+        if( MirrorMask(i,j) && r<ZerRadTrim)
             phi = atan2(mirrorYGrid(i,j),mirrorXGrid(i,j));
-            ZernikePol(i,j) = zernfun(nZer,mZer,r,phi,'norm');
-            ZernikeMask(i,j) = 1;
-        else
-            ZernikeMask(i,j) = 0;
+            ZerPol(i,j) = zernfun(ZerN,ZerM,r,phi,'norm');
+            ZerMask(i,j) = 1;
         end
         
     end
 end
 
-% Multiplot Zerenikes
-nZerPlots = [2 4 6 8 10 4]; mZerPlots = [2 2 2 2 2 4];
-ZernikePolPlots = NaN(MirrorGridSize,MirrorGridSize,length(nZerPlots));
-%ZernikePolPlots(MirrorMask)=0;
-figure; counter=1;
-for k = 1:length(nZerPlots)
-    for j=1:MirrorGridSize
-        for i=1:MirrorGridSize
-            r = sqrt(mirrorXGrid(i,j)^2 + mirrorYGrid(i,j)^2);
-            if( r<0.95 )
-                phi = atan2(mirrorYGrid(i,j),mirrorXGrid(i,j));
-                ZernikePolPlots(i,j,k) = zernfun(nZerPlots(k),mZerPlots(k),r,phi,'norm');
-            end
-        end
-    end
-    handler = subplot(2,3,counter);
-    surf(handler,mirrorXGrid,mirrorYGrid,ZernikePolPlots(:,:,k),'edgecolor','interp'); hold off; drawnow;
-    xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]);
-    zlim([-1,1]*1.5);
-    title("Zernike n: " + nZerPlots(k) + ", m: " + mZerPlots(k));
-    counter = counter + 1;
-end
+% % Multiplot Zerenikes
+% ZerPolNs = [1 1 2 2 2 3]; ZerPolMs = [-1 1 -2 0 2 1];
+% ZerPols = NaN(MirrorGridSize,MirrorGridSize,length(ZerPolNs));
+% figure; counter=1;
+% for k = 1:length(ZerPolNs)
+%     for j=1:MirrorGridSize
+%         for i=1:MirrorGridSize
+%             r = sqrt(mirrorXGrid(i,j)^2 + mirrorYGrid(i,j)^2);
+%             if( r<0.95 )
+%                 phi = atan2(mirrorYGrid(i,j),mirrorXGrid(i,j));
+%                 ZerPols(i,j,k) = zernfun(ZerPolNs(k),ZerPolMs(k),r,phi,'norm');
+%             end
+%         end
+%     end
+%     handler = subplot(2,3,counter);
+%     surf(handler,mirrorXGrid,mirrorYGrid,ZerPols(:,:,k),'edgecolor','interp'); hold off;
+%     colormap jet; shading interp;
+%     xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]);
+%     zlim([-1,1]*1.5);
+%     title("Zernike n: " + ZerPolNs(k) + ", m: " + ZerPolMs(k)); drawnow;
+%     counter = counter + 1;
+% end
 
 % Plot Zernike function
-ZernikePolMax = max(max(ZernikePol)); ZernikePolMin = min(min(ZernikePol));
-ZernikePolAmp = ZernikePolMax - ZernikePolMin;
-ZernikePol = 2*(ZernikePol/ZernikePolAmp)*ZernikeAmpFact;
+ZerPolMax = max(max(ZerPol)); ZerPolMin = min(min(ZerPol));
+ZerPolAmp = ZerPolMax - ZerPolMin;
+ZerPol = 2*(ZerPol/ZerPolAmp)*ZerAmpFact;
 
-ZernikePolMax = max(max(ZernikePol)); ZernikePolMin = min(min(ZernikePol));
-ZernikePolAmp = ZernikePolMax - ZernikePolMin;
-ZernikePol = ZernikePol -ZernikePolMin;
+ZerPolMax = max(max(ZerPol)); ZerPolMin = min(min(ZerPol));
+ZerPolAmp = ZerPolMax - ZerPolMin;
+ZerPol = ZerPol - ZerPolMin;
 
-ZernikePolMax = max(max(ZernikePol)); ZernikePolMin = min(min(ZernikePol));
-ZernikePolAmp = ZernikePolMax - ZernikePolMin;
+ZerPolMax = max(max(ZerPol)); ZerPolMin = min(min(ZerPol));
+ZerPolAmp = ZerPolMax - ZerPolMin;
 
-figure; surf(mirrorXGrid,mirrorYGrid,ZernikePol); hold off; drawnow;
-title("Zernike: n="+nZer+", m="+mZer);
+figure; surf(mirrorXGrid,mirrorYGrid,ZerPol); hold off;
+colormap jet; shading interp; colorbar;
+title("Zernike: n="+ZerN+", m="+ZerM);
+view([-32,40])
 xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]);
-zlim([ZernikePolMin-ZernikePolAmp*0.1,ZernikePolMax+ZernikePolAmp*0.1]);
-[ZernikePolVec,~] = MatUtils.matrixToVecIdxMap(ZernikePol,MirrorMask);
+% zlim([ZerPolMin-ZerPolAmp*0.1,ZerPolMax+ZerPolAmp*0.1]);
+zlim([-80,180]); caxis([-30,120]);
+daspect([1,1,3*120]); drawnow;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Everything here is computed for whole mirror surface
@@ -92,49 +99,35 @@ zlim([ZernikePolMin-ZernikePolAmp*0.1,ZernikePolMax+ZernikePolAmp*0.1]);
 % the vectors such that the defelction is z = MCal * P with P being the
 % vector with the preassure of each electrode
 maskToUse = MirrorMask;
-TotalZPoints = sum(sum(maskToUse));
-AvgElectVecMask = NaN(TotalZPoints,ElectGrid^2);
-ElectVecMask = zeros(TotalZPoints,ElectGrid);
-MCal = NaN(TotalZPoints,ElectGrid^2);
+ZPointsTotal = sum(sum(maskToUse));
+AvgElectMaskVec = NaN(ZPointsTotal,ElectGrid^2);
+ElectMaskVec = zeros(ZPointsTotal,ElectGrid);
+ElectAreaPercent = (sum(sum(sum(ElectMasks)))/ElectGrid^2)/ZPointsTotal;
+MCal = NaN(ZPointsTotal,ElectGrid^2);
 for k=1:ElectGrid^2
-    [ElectVecMask(:,k),~] = MatUtils.matrixToVecIdxMap(ElectMasks(:,:,k),maskToUse);
-    AvgElectVecMask(:,k) = ElectVecMask(:,k)/sum(ElectVecMask(:,k));
-    [vec,mirrorMaskIdxMap] = MatUtils.matrixToVecIdxMap(InfFuncs(:,:,k),maskToUse);
+    [ElectMaskVec(:,k),MirrorMaskIdxMap] = MatUtils.matrixToVecIdxMap(ElectMasks(:,:,k),maskToUse);
+    AvgElectMaskVec(:,k) = ElectMaskVec(:,k)/sum(ElectMaskVec(:,k));
+    [vec,~] = MatUtils.matrixToVecIdxMap(ScaledInfFuncs(:,:,k),maskToUse);
     MCal(:,k) = vec;
 end
 
 % Computes spring constans matrix K and final mirror mat such that
-% Z = MirrorMat * YPhi with
-% MirrorMat = inv(I+Matcal*K*ElectAvg)*MCal
-K = diag(ones(ElectGrid^2,1));
-MMCal = eye(TotalZPoints,TotalZPoints) + MCal*K*(AvgElectVecMask');
-MirrorMat = inv(MMCal)*MCal;
-pinvMirrorMat = inv(MirrorMat'*MirrorMat)*MirrorMat';
+K = 170*diag(ones(ElectGrid^2,1))/(sum(sum(sum(ElectMasks)))/ElectGrid^2) ; % Stiffness 170 N/m
+HBold = inv( eye(ZPointsTotal,ZPointsTotal)+MCal*K*(AvgElectMaskVec') )*MCal;
+pInvHBold = inv(HBold'*HBold)*HBold';
 
-% Plots illustrative output with some random pressures
-% YPhi = ones(ElectGrid^2,1)*0.5;
-YPhi = rand(ElectGrid^2,1)*0.5 - 0.25;
-% Z = inv(MMCal'*MMCal)*MMCal'*MCal*YPhi;
-Z = MirrorMat*YPhi;
-ZMat = MatUtils.vecIdxMapToMatrix(Z,mirrorMaskIdxMap,MirrorGridSize,MirrorGridSize,NaN);
-figure; surf(mirrorXGrid,mirrorYGrid,ZMat); hold off; drawnow;
-xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]);
-zlim([-1,1]*0.5);
-title("Random Pressures");
-
-% Some Influence functions
-figure; counter=1;
-for i=[1 5 10 15 20 25] %i=1:ElectGrid^2
-    handler = subplot(2,3,counter);
-    YPhi = [zeros(i-1,1);1;zeros(ElectGrid^2-i,1)];
-    Z = MirrorMat*YPhi;
-    ZMat = MatUtils.vecIdxMapToMatrix(Z,mirrorMaskIdxMap,MirrorGridSize,MirrorGridSize,NaN);
-    surf(handler,mirrorXGrid,mirrorYGrid,ZMat,'edgecolor','interp'); hold off; drawnow;
-    xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]);
-    zlim([-1,1]*0.30);
-    title("Actuator "+i);
-    counter = counter + 1;
-end
+% % Some Influence functions
+% figure; counter=1;
+% for i=[1 5 10 15 20 25] %i=1:ElectGrid^2
+%     handler = subplot(2,3,counter);
+%     ZMat = MatUtils.vecIdxMapToMatrix(HBold(:,i),MirrorMaskIdxMap,MirrorGridSize,MirrorGridSize,NaN);
+%     surf(handler,mirrorXGrid,mirrorYGrid,ZMat,'edgecolor','interp'); hold off;
+%     colormap jet; shading interp;
+%     xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]);
+%     zlim([ZerPolMin-ZerPolAmp*0.1,ZerPolMax+ZerPolAmp*0.1]);
+%     title("Actuator "+i); drawnow;
+%     counter = counter + 1;
+% end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Everything here is computed using zernike mask
@@ -143,44 +136,54 @@ end
 % Accommodates the values of the influence functions to be multiplied by
 % the vectors such that the defelction is z = MCal * P with P being the
 % vector with the preassure of each electrode
-maskToUse = ZernikeMask;
-ZerTotalZPoints = sum(sum(maskToUse));
-ZerAvgElectVecMask = NaN(ZerTotalZPoints,ElectGrid^2);
-ZerElectVecMask = zeros(ZerTotalZPoints,ElectGrid);
-ZerMCal = NaN(ZerTotalZPoints,ElectGrid^2);
+maskToUse = ZerMask;
+
+ZerZPointsTotal = sum(sum(maskToUse));
+ZerAvgElectMaskVec = NaN(ZerZPointsTotal,ElectGrid^2);
+ZerElectMaskVec = zeros(ZerZPointsTotal,ElectGrid);
+ZerMCal = NaN(ZerZPointsTotal,ElectGrid^2);
 for k=1:ElectGrid^2
-    [ZerElectVecMask(:,k),~] = MatUtils.matrixToVecIdxMap(ElectMasks(:,:,k),maskToUse);
-    ZerAvgElectVecMask(:,k) = ZerElectVecMask(:,k)/sum(ZerElectVecMask(:,k));
-    [vec,~] = MatUtils.matrixToVecIdxMap(InfFuncs(:,:,k),maskToUse);
+    [ZerElectMaskVec(:,k),ZerMaskIdxMap] = MatUtils.matrixToVecIdxMap(ElectMasks(:,:,k),maskToUse);
+    ZerAvgElectMaskVec(:,k) = ZerElectMaskVec(:,k)/sum(ElectMaskVec(:,k));
+    [vec,~] = MatUtils.matrixToVecIdxMap(ScaledInfFuncs(:,:,k),maskToUse);
     ZerMCal(:,k) = vec;
 end
 
-% Computes spring constans matrix K and final mirror mat such that
-% Z = MirrorMat * YPhi with
-% MirrorMat = inv(I+Matcal*K*ElectAvg)*MCal
-K = diag(ones(ElectGrid^2,1));
-ZerMMCal = eye(ZerTotalZPoints,ZerTotalZPoints) + ZerMCal*K*(ZerAvgElectVecMask');
-ZerMirrorMat = inv(ZerMMCal)*ZerMCal;
-ZerPinvMirrorMat = inv(ZerMirrorMat'*ZerMirrorMat)*ZerMirrorMat';
+% Computes spring constans matrix K and final mirror mat
+ZerHBold = inv( eye(ZerZPointsTotal,ZerZPointsTotal)+ZerMCal*K*(ZerAvgElectMaskVec') )*ZerMCal;
+ZerPInvHBold = inv(ZerHBold'*ZerHBold)*ZerHBold';
 
 % Compute reference values with MLSE
-[ZernikePolMaskVec,ZernikePolMaskVecIdxMap] = MatUtils.matrixToVecIdxMap(ZernikePol,maskToUse);
-YPhiRef = ZerPinvMirrorMat*ZernikePolMaskVec;
-ZFit = MirrorMat*YPhiRef;
-ZFitMat = MatUtils.vecIdxMapToMatrix(ZFit,mirrorMaskIdxMap,MirrorGridSize,MirrorGridSize,NaN);
-ZFitZerMask = MatUtils.matrixToVecIdxMap(ZFitMat,maskToUse);
+[ZerPolVec_ZerMask,~] = MatUtils.matrixToVecIdxMap(ZerPol,maskToUse);
+PressRef = ZerPInvHBold*ZerPolVec_ZerMask;
+ZFit = HBold*PressRef;
+% sum(abs(ZerPInvHBold*ZerPolVec_ZerMask - pInvHBold*ZFit)) % This compares YPhiRef[using Zernike mask] and YPhiRef[using mirror mask]
+ZFitMat = MatUtils.vecIdxMapToMatrix(ZFit,MirrorMaskIdxMap,MirrorGridSize,MirrorGridSize,NaN);
+ZFitVecZerMask = MatUtils.matrixToVecIdxMap(ZFitMat,maskToUse);
+ZFitMax = max(ZFit); ZFitMin = min(ZFit); ZFitPad = 0.20;
+ZFitAmp = ZFitMax - ZFitMin; ZFitMaxAbs = 100;%max(abs([ZFitMin,ZFitMax]));
 
-figure; surf(mirrorXGrid,mirrorYGrid,ZFitMat,'edgecolor','interp'); hold off; drawnow;
-colorbar; colormap jet;
-shading interp
-ZMax = max(ZFit); ZMin = min(ZFit); ZPad = 0.20;
-ZAmp = ZMax - ZMin; ZMaxAbs = max(abs([ZMin,ZMax]));
-zlim([-1 1]*ZMaxAbs); caxis([-1,1]*ZMaxAbs);
-daspect([1,1,max([ZAmp,ZPad])*1.35]);
+figure; surf(mirrorXGrid,mirrorYGrid,(ZerPol-ZFitMat).*ZerMask,'edgecolor','interp'); hold off;
+colormap jet; shading interp; colorbar;
+title('ZerPol - ZFit');
+view([-32,40])
 xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]); 
-title("Reference $Z_d$",'interpreter','latex');
-% zlim([ZernikePolMin-ZernikePolAmp*0.1, ZernikePolMax+ZernikePolAmp*0.1]);
-% daspect([1,1,0.05]);
-% title("Best Zernike Fit");
-TotalSqrError = sum((ZFit-ZernikePolVec).^2)
+zlim([-80,180]); caxis([-30,120]);
+daspect([1,1,3*120]); drawnow;
+
+TotalError = nansum(nansum( ((ZerPol-ZFitMat).*ZerMask).^2 ))/ZPointsTotal
+
+figure; surf(mirrorXGrid,mirrorYGrid,ZFitMat,'edgecolor','interp'); hold off;
+colormap jet; shading interp; colorbar;
+% title('ZFit');
+view([-32,40])
+xlim([-MaxRad MaxRad]); ylim([-MaxRad MaxRad]);
+zlim([-80,180]); caxis([-30,120]);
+daspect([1,1,3*120]); drawnow;
+
+xlabel('','interpreter','latex');
+ylabel('','interpreter','latex');
+zlabel('$nm$','interpreter','latex'); drawnow;
+
+saveas(gca, "hdm_mirror_reference","epsc");
 

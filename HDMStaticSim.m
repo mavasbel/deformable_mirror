@@ -2,7 +2,7 @@ close all
 clc
 
 % Deflection axis limits
-zMax = 3.5*max(max(MirrorMat));
+zMax = 3.5*max(max(HBold));
 % zMax = 0.7;
 zMin = -0.2;
 
@@ -18,8 +18,7 @@ surfHand = surf( mirrorXGrid,...
 view([-32,40])
 % [axHand.View(1),axHand.View(2)]
 caxis([zMin,zMax]);
-colorbar; colormap jet;
-shading interp
+colorbar; colormap jet; shading interp;
 daspect([1,1,1.33]); % axis equal
 zlim([zMin,zMax])
 
@@ -61,13 +60,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [Z] = applyInputAnim(input,elect,forceReload)
-    persistent PhiArr ECoup MirrorMat mirrorMaskIdxMap MirrorGridSize ...
+    persistent PhiArr ECoup HBold MirrorMaskIdxMap MirrorGridSize ...
                 surfHand isRecording vidWriter;
     if isempty(PhiArr) || (nargin==3 && forceReload)
         PhiArr = evalin('base','PhiArr');
         ECoup = evalin('base','ECoup');
-        MirrorMat = evalin('base','MirrorMat');
-        mirrorMaskIdxMap = evalin('base','mirrorMaskIdxMap');
+        HBold = evalin('base','HBold');
+        MirrorMaskIdxMap = evalin('base','MirrorMaskIdxMap');
         MirrorGridSize = evalin('base','MirrorGridSize');
         surfHand = evalin('base','surfHand');
         isRecording = evalin('base','isRecording');
@@ -78,8 +77,8 @@ function [Z] = applyInputAnim(input,elect,forceReload)
         applyInput(PhiArr,input(i),1,ECoup(elect,:));
         YPhi = getPhiArrOutputs(PhiArr);
 
-        Z = MirrorMat*YPhi;
-        ZMat = MatUtils.vecIdxMapToMatrix(Z,mirrorMaskIdxMap,...
+        Z = HBold*YPhi;
+        ZMat = MatUtils.vecIdxMapToMatrix(Z,MirrorMaskIdxMap,...
                                 MirrorGridSize,MirrorGridSize,NaN);
         set(surfHand,'ZData',ZMat);
 

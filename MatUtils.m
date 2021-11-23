@@ -1,6 +1,9 @@
 classdef MatUtils
     
     methods(Static)
+        
+        % Convert stack columns of a matrix as vector (skip elements not
+        % marked in the mask)
         function [vec,idxMap] = matrixToVecIdxMap(mat,mask)
             vec = NaN(sum(sum(mask)),1);
             idxMap = NaN(sum(sum(mask)),2);
@@ -17,6 +20,8 @@ classdef MatUtils
             end
         end
         
+        % Convert stacked vector to a matrix of rowx x cols using the
+        % using the mapping of indexes idxMap
         function matrix = vecIdxMapToMatrix(vec,idxMap,rows,cols,fill)
             matrix = ones(rows,cols)*fill;
 
