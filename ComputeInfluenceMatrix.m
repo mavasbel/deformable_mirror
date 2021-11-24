@@ -4,9 +4,10 @@ clc
 % File name to store influence functions
 fileName = "InfMat.mat";
 NSeqLim = 80;
-ElectGridSize = 50;
+ElectGridSize = 40;
 
 InfFuncs = NaN(MirrorGridSize,MirrorGridSize,size(ElectCorners,1));
+tStart = tic;
 for k = 1:size(ElectCorners,1)
     tElect = tic;
     for j=1:MirrorGridSize

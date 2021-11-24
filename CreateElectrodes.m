@@ -5,7 +5,7 @@ clc
 % Parameters for electrodes creation
 lineWidth = 1.5;
 MaxRad = 1;
-EfectiveSurfFact = 0.70;
+EfectiveSurfFact = 0.55;
 ElectGrid = 5;
 ElectWidth = 0.12;
 ElectCorner00 = EfectiveSurfFact*MaxRad/sqrt(2);
@@ -77,6 +77,7 @@ mirrorXIsoLine = linspace(mirrorXLim(1),mirrorXLim(2),MirrorGridSize);
 mirrorYIsoLine = linspace(mirrorYLim(1),mirrorYLim(2),MirrorGridSize);
 [mirrorXGrid,mirrorYGrid] = meshgrid(mirrorXIsoLine,mirrorYIsoLine);
 
+% Creates mirror mask
 MirrorMask = mirrorXGrid.^2 + mirrorYGrid.^2 <= MaxRad^2*ones(MirrorGridSize,MirrorGridSize);
 
 % for j=1:MirrorGridSize
