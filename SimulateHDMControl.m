@@ -35,9 +35,10 @@ if(isRecording)
 end
 
 % Control parameters
-kappa = 0.5;
+kappa = 0.130;
 ZErrorMaxThres = ZFitAmp*1/100;
-samplesPerSegment = 30;
+samplesPerSegment = 2;
+ElectInputs = 700*ones(ElectGrid^2,1); % Initial value
 
 %Save figure
 saveas(gca, "hdm_control_initial.eps","epsc");
@@ -63,6 +64,8 @@ disp("Reset")
 disp("Max Deflection Error Threshold: " + ZErrorMaxThres);
 disp("Max Deflection Error: " + max(abs(ZError)));
 disp("Max Pressure Error: " + max(abs(PressError)));
+disp("Min Deflection Error: " + min(ZError));
+disp("Min Pressure Error: " + min(PressError));
 disp("-------------------------------");
     
 %Save figure
@@ -71,15 +74,15 @@ saveas(gca, "hdm_control_reset.eps","epsc");
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Control loop
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ElectInputs = ones(ElectGrid^2,1)*700;
 iter = 0;
 while(true)
     
-    if ZError<=ZErrorMaxThres break;
+    if max(abs(ZError))<=ZErrorMaxThres break;
     else iter = iter + 1; end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
+    PressError(PressError<0) = 0;
     ElectInputs = ElectInputs + kappa*PressError;
     %[sortedInputs,idx] = sort(ElectInputs,'descend');    
     sortedInputs = ElectInputs;
@@ -119,10 +122,13 @@ while(true)
     end
     
     [ZVecZerMask,~] = MatUtils.matrixToVecIdxMap(ZMat,ZerMask);
-    ZError = ZFitVecZerMask - ZVecZerMask; 
-    PressError = ZerPInvHBold*ZError;
+    ZError = ZFitVecZerMask - ZVecZerMask;
+%     ZErrorPos = ZError; ZErrorPos(ZError<0)=0;
+    PressError = (ZerPInvHBold*ZError);
     disp("Max Deflection Error: " + max(abs(ZError)));
     disp("Max Pressure Error: " + max(abs(PressError)));
+    disp("Min Deflection Error: " + min(ZError));
+    disp("Min Pressure Error: " + min(PressError));
     disp("-------------------------------");
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -183,12 +189,13 @@ function [ZVec,ZMat,Press] = applyInputAnim(input,muxCh,ECoup,forceReload)
 end
 
 function [ZVec,ZMat,Press] = applyInput(input,muxCh,ECoup,forceReload)
-    persistent PhiArr HBold MirrorMaskIdxMap MirrorGridSize;
+    persistent PhiArr HBold MirrorMaskIdxMap MirrorGridSize YoungMod;
     if isempty(PhiArr) || (nargin==4 && forceReload)
         PhiArr = evalin('base','PhiArr');
         HBold = evalin('base','HBold');
         MirrorMaskIdxMap = evalin('base','MirrorMaskIdxMap');
         MirrorGridSize = evalin('base','MirrorGridSize');
+        YoungMod = evalin('base','YoungMod');
     end
     
     inputs = ECoup(:,muxCh)*input;
@@ -197,7 +204,7 @@ function [ZVec,ZMat,Press] = applyInput(input,muxCh,ECoup,forceReload)
     end
     
     % Compute deflections
-    Press = 1.75*getPhiArrOutputs(PhiArr);
+    Press = YoungMod*getPhiArrOutputs(PhiArr);
     ZVec = HBold*Press;
     ZMat = MatUtils.vecIdxMapToMatrix(ZVec,MirrorMaskIdxMap,...
                             MirrorGridSize,MirrorGridSize,NaN);

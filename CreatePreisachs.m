@@ -2,11 +2,17 @@ close all
 clc
 
 % Consider electrical coupling factor and paramenters of base Preisach
-CouplFac = 0.40;
+CouplFac = 0.35;
 basePhi = preisachRelayModel;
 inputMin = preisachRelayModel.inputGrid(1);
 inputMax = preisachRelayModel.inputGrid(end);
 gridSize = preisachRelayModel.gridSize;
+YoungMod = MaxPressRef/415
+
+basePhi.resetRelaysOn();
+basePhi.updateRelays(0);
+MaxRemnantPress = YoungMod*preisachRelayModel.getOutput();
+MaxRefMaxRemnantRelation = MaxPressRef/MaxRemnantPress
 
 % Creates vector of Preisach operators
 PhiArr = [];

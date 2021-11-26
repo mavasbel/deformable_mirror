@@ -7,9 +7,15 @@ clc
 fileName = "InfMat_5x5_Eff_55_Wid_12.mat";
 load(fileName)
 
+% Rad and surface tension for scaling
+T = 1;
+MirrorRad = 1;
+MirrorArea = pi*MirrorRad^2;
+ElectArea = (MirrorRad*ElectWidth)^2;
+
 % Influence functions scaled by the relation between radius and surface tension
 % ScaledInfFuncs = InfFuncs/max(max(max(InfFuncs)))-min(min(min(InfFuncs))) ); % Assuming surface tension and radious relation is rad = 10cm, tension=100N
-ScaledInfFuncs = InfFuncs; % Assuming surface tension and radious relation is rad = 10cm = 100mm, tension=10N
+ScaledInfFuncs = (MirrorRad^2/T)*InfFuncs; % Assuming surface tension and radious relation is rad = 10cm = 100mm, tension=10N
 
 % ZernikePol
 ZerN = 2; ZerM = -2;
@@ -104,7 +110,7 @@ maskToUse = MirrorMask;
 ZPointsTotal = sum(sum(maskToUse));
 AvgElectMaskVec = NaN(ZPointsTotal,ElectGrid^2);
 ElectMaskVec = zeros(ZPointsTotal,ElectGrid);
-ElectAreaPercent = (sum(sum(sum(ElectMasks)))/ElectGrid^2)/ZPointsTotal;
+% ElectAreaPercent = (sum(sum(sum(ElectMasks)))/ElectGrid^2)/ZPointsTotal;
 MCal = NaN(ZPointsTotal,ElectGrid^2);
 for k=1:ElectGrid^2
     [ElectMaskVec(:,k),MirrorMaskIdxMap] = MatUtils.matrixToVecIdxMap(ElectMasks(:,:,k),maskToUse);
@@ -114,7 +120,9 @@ for k=1:ElectGrid^2
 end
 
 % Creates spring constans matrix K and computes HDM matrix H
-K = 170*diag(ones(ElectGrid^2,1))/(sum(sum(sum(ElectMasks)))/ElectGrid^2) ; % Stiffness 170 N/m
+kSpring = 12;
+K = (kSpring/ElectArea)*diag(ones(ElectGrid^2,1))/((sum(sum(sum(ElectMasks)))/ElectGrid^2)); % Stiffness 170 N/m
+% K = 170*diag(ones(ElectGrid^2,1))/ElectArea; % Stiffness 170 N/m
 HBold = inv( eye(ZPointsTotal,ZPointsTotal)+MCal*K*(AvgElectMaskVec') )*MCal;
 pInvHBold = inv(HBold'*HBold)*HBold';
 
@@ -172,7 +180,7 @@ daspect([1,1,3*120]); drawnow;
 
 % Error
 % TotalError = nansum(nansum( ((ZerPol-ZFitMat).*ZerMask).^2 ))/ZPointsTotal
-MaxError = max(max(ZerPol-ZFitMat))
+MaxZerZError = max(max(ZerPol-ZFitMat))
 
 % Plot best approximation
 figure; surf(mirrorXGrid,mirrorYGrid,ZFitMat,'edgecolor','interp'); hold off;
@@ -189,3 +197,6 @@ ylabel('','interpreter','latex');
 zlabel('$nm$','interpreter','latex'); drawnow;
 saveas(gca, "hdm_mirror_reference","epsc");
 
+% Mirror physical dimensions and Young's modulus
+MaxZFit = max(max(ZFitMat))
+MaxPressRef = max(PressRef)

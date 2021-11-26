@@ -68,8 +68,8 @@ axis square
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Parameters for computation and saving of influence functions
-a = 1;
-T = 1;
+% a = 1;
+% T = 1;
 MirrorGridSize = 100;
 mirrorXLim = [-MaxRad, MaxRad];
 mirrorYLim = [-MaxRad, MaxRad];
