@@ -10,6 +10,3 @@ Simulation files for the [hysteretic deformable mirror project](https://research
             height:350px"/> 
   </a>
 </p>
-
-## License
-[MIT]
