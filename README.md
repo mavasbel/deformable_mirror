@@ -4,7 +4,10 @@ Simulation files for the [hysteretic deformable mirror project](https://research
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=zcaRLWy1KE8">
-    <img src="https://githubprojectsfiles.s3.us-west-1.amazonaws.com/deformable_mirror.png" /> 
+    <img src="https://githubprojectsfiles.s3.us-west-1.amazonaws.com/deformable_mirror.png" 
+            style="object-fit:scale-down;
+            width:400px;
+            height:200px"/> 
   </a>
 </p>
 
