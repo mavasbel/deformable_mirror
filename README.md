@@ -1,4 +1,4 @@
-# Hysteretic deforomable mirror project
+# Hysteretic deforomable mirror simulation
 
 Simulation files for the [hysteretic deformable mirror project](https://research.rug.nl/en/publications/high-pixel-number-deformable-mirror-concept-utilizing-piezoelectr-3) part of the [PhD dissertation](https://research.rug.nl/en/publications/multi-loop-hysteresis-and-recursive-remnant-control).
 
